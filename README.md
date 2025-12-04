@@ -1,0 +1,1 @@
+# fivetran-automation-gitlab-ci-template
