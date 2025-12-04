@@ -1,0 +1,54 @@
+image: python:3.11
+
+stages:
+  - manual_jobs
+  - scheduled_jobs
+
+before_script:
+  - pip install requests
+# -----------------------------------
+# MANUAL: Pause the connector
+# -----------------------------------
+pause_connector:
+  stage: manual_jobs
+  script:
+    - python scripts/patch_fivetran_conn.py
+  when: manual
+  variables:
+    CONNECTION_ID: "conquest_sprite"
+    PATCH_PAYLOAD: '{"paused": true}'
+# -----------------------------------
+# MANUAL: Unpause the connector
+# -----------------------------------
+unpause_connector:
+  stage: manual_jobs
+  script:
+    - python scripts/patch_fivetran_conn.py
+  when: manual
+  variables:
+    CONNECTION_ID: "conquest_sprite"
+    PATCH_PAYLOAD: '{"paused": false}'
+# -----------------------------------
+# SCHEDULED: Lower frequency (e.g. 30 min)
+# -----------------------------------
+set_freq_low:
+  stage: scheduled_jobs
+  script:
+    - python scripts/patch_fivetran_conn.py
+  variables:
+    CONNECTION_ID: "conquest_sprite"
+    PATCH_PAYLOAD: '{"sync_frequency": 30}'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $CI_SCHEDULE_NAME == "set_freq_low_schedule"
+# -----------------------------------
+# SCHEDULED: Raise frequency (e.g. 5 min)
+# -----------------------------------
+set_freq_high:
+  stage: scheduled_jobs
+  script:
+    - python scripts/patch_fivetran_conn.py
+  variables:
+    CONNECTION_ID: "conquest_sprite"
+    PATCH_PAYLOAD: '{"sync_frequency": 5}'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $CI_SCHEDULE_NAME == "set_freq_high_schedule"
