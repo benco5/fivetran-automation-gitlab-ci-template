@@ -4,8 +4,8 @@ import requests
 
 BASE64_API_KEY = os.environ.get("FIVETRAN_BASE64_API_KEY")
 CONNECTION_ID = os.environ.get("CONNECTION_ID")
-PATCH_PAYLOAD = os.environ.get("PATCH_PAYLOAD")
-BASE_URL = f"https://api.fivetran.com/v1/connections/{CONNECTION_ID}"
+BASE_URL = f"https://api.fivetran.com/v1/connections/{CONNECTION_ID}/sync"
+SYNC_PAYLOAD = {"force": True}
 
 headers = {
     "Accept": "application/json;version=2",
@@ -13,13 +13,9 @@ headers = {
     "content-type": "application/json"
 }
 
-def patch_update():
-    if not PATCH_PAYLOAD:
-        raise ValueError("PATCH_PAYLOAD is required but was not found.")
-
+def force_sync():
     try:
-        patch_body = json.loads(PATCH_PAYLOAD)
-        response = requests.request("PATCH", BASE_URL, json=patch_body, headers=headers)
+        response = requests.request("POST", BASE_URL, json=SYNC_PAYLOAD, headers=headers)
 
         response.raise_for_status()
 
@@ -29,7 +25,7 @@ def patch_update():
     except json.JSONDecodeError as e:
         print(f"An error occurred while decoding JSON: {e}")
     except requests.exceptions.RequestException as e:
-        print(f"There was an issue when trying to update the connection {CONNECTION_ID}: {e}.")
+        print(f"There was an issue when trying to force syncing of the connection {CONNECTION_ID}: {e}.")
 
 if __name__ == "__main__":
-    patch_update()
+    force_sync()

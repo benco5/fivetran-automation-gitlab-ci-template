@@ -24,6 +24,7 @@ unpause_connector:
   stage: manual_jobs
   script:
     - python scripts/patch_fivetran_conn.py
+    - python scripts/sync_fivetran_conn.py
   when: manual
   variables:
     CONNECTION_ID: "conquest_sprite"
